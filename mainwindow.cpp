@@ -65,7 +65,7 @@ void MainWindow::fillPortsParameters()
 void MainWindow::serialConnect()
 {
     sp->setPortName(ui->cboxPort->currentText());
-    sp->setBaudRate(QSerialPort::Baud115200);
+    sp->setBaudRate(QSerialPort::Baud9600);
     sp->setDataBits(QSerialPort::Data8);
     sp->setStopBits(QSerialPort::OneStop);
     sp->setParity(QSerialPort::NoParity);
@@ -174,10 +174,75 @@ void MainWindow::sendMsg_BelugaPNSN()
 void MainWindow::serialRead()
 {
     // qInfo() << "Bytes Letti: " << buf;
-    QByteArray data = sp->readAll();
-    //ui->txtEdRead->append(data);
-    uint16_t len = data.size();
-    parse_mavlink_msg((uint8_t*)data.data(), len);
+    //QByteArray data = sp->readAll();
+    QByteArray buf = sp->readAll() ;
+    //while(sp->bytesAvailable()){
+    foreach (char byte_read, buf) {
+
+        switch(frame_state){
+            case XBEE::START_DELIMITER:{
+                if(byte_read == 0x7E){
+                    data_buf.append(byte_read);
+                    xbee_frame_idx = 1;
+                    frame_state = XBEE::LENGTH;
+                }
+                break;
+            }
+
+            case XBEE::LENGTH:{
+                if(xbee_frame_idx == 1){
+                    data_buf.append(byte_read);
+                    xbee_frame_len += byte_read << 8;
+                    xbee_frame_idx++;
+                }else if(xbee_frame_idx == 2){
+                    data_buf.append(byte_read);
+                    xbee_frame_len += byte_read;
+                    xbee_frame_len += XBEE::XBEE_FRAME_INIT_OFFSET_BYTE;
+                    xbee_frame_idx++;
+                    frame_state = XBEE::FRAME_TYPE;
+                }
+                break;
+            }
+
+            case XBEE::FRAME_TYPE:{
+                if(xbee_frame_idx < xbee_frame_len - 1){
+                    data_buf.append(byte_read);
+                    xbee_frame_idx++;
+                    frame_state = XBEE::DATA;
+                }
+                break;
+            }
+
+            case XBEE::DATA:{
+                if(xbee_frame_idx < xbee_frame_len - 1){
+                    data_buf.append(byte_read);
+                    xbee_frame_idx++;
+                }else if(xbee_frame_idx == xbee_frame_len - 1){
+                    data_buf.append(byte_read);
+                    xbee_frame_idx++;
+                    frame_state = XBEE::CHECK_SUM;
+                }
+                break;
+            }
+
+            case XBEE::CHECK_SUM:{
+                if(xbee_frame_idx == xbee_frame_len){
+                    data_buf.append(byte_read);
+                    msg = data_buf;
+                    xbee_frame_idx = 0;
+                    xbee_frame_len = 0;
+                    data_buf.clear();
+                    frame_state = XBEE::START_DELIMITER;
+                }
+                break;
+            }
+        }
+    }
+
+
+    ui->txtEdRead->append(msg.toHex());
+    //uint16_t len = data.size();
+    //parse_mavlink_msg((uint8_t*)data.data(), len);
 }
 
 void MainWindow::parse_mavlink_msg(uint8_t *buf, uint16_t &buf_len){

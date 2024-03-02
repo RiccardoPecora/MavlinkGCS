@@ -17,7 +17,7 @@
    <widget class="QTextEdit" name="txtEdRead">
     <property name="geometry">
      <rect>
-      <x>200</x>
+      <x>319</x>
       <y>70</y>
       <width>351</width>
       <height>192</height>
@@ -27,9 +27,9 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>160</x>
-      <y>10</y>
-      <width>311</width>
+      <x>389</x>
+      <y>20</y>
+      <width>191</width>
       <height>31</height>
      </rect>
     </property>
@@ -41,13 +41,13 @@
      </font>
     </property>
     <property name="text">
-     <string>Serial Port Communication</string>
+     <string>MAVLINK GCS</string>
     </property>
    </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>2</x>
+      <x>20</x>
       <y>72</y>
       <width>158</width>
       <height>205</height>
@@ -161,7 +161,7 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>570</x>
+      <x>680</x>
       <y>70</y>
       <width>95</width>
       <height>231</height>
@@ -207,7 +207,7 @@
    <widget class="QLineEdit" name="linEdWrite">
     <property name="geometry">
      <rect>
-      <x>201</x>
+      <x>320</x>
       <y>272</y>
       <width>351</width>
       <height>26</height>
@@ -284,7 +284,7 @@
    <widget class="QSplitter" name="splitter">
     <property name="geometry">
      <rect>
-      <x>711</x>
+      <x>821</x>
       <y>70</y>
       <width>191</width>
       <height>127</height>
@@ -385,7 +385,7 @@
    <widget class="QPushButton" name="btnHeartBit">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>320</x>
       <y>340</y>
       <width>121</width>
       <height>29</height>
@@ -398,7 +398,7 @@
    <widget class="QPushButton" name="btnAttitude">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>320</x>
       <y>370</y>
       <width>121</width>
       <height>29</height>
@@ -411,7 +411,7 @@
    <widget class="QLineEdit" name="le_sys_id">
     <property name="geometry">
      <rect>
-      <x>1020</x>
+      <x>1130</x>
       <y>70</y>
       <width>90</width>
       <height>26</height>
@@ -427,7 +427,7 @@
    <widget class="QLabel" name="lbl_sys_id">
     <property name="geometry">
      <rect>
-      <x>950</x>
+      <x>1060</x>
       <y>70</y>
       <width>63</width>
       <height>26</height>
@@ -443,7 +443,7 @@
    <widget class="QLabel" name="lbl_comp_id">
     <property name="geometry">
      <rect>
-      <x>950</x>
+      <x>1060</x>
       <y>100</y>
       <width>63</width>
       <height>26</height>
@@ -459,7 +459,7 @@
    <widget class="QLineEdit" name="le_comp_id">
     <property name="geometry">
      <rect>
-      <x>1020</x>
+      <x>1130</x>
       <y>100</y>
       <width>90</width>
       <height>26</height>
@@ -475,7 +475,7 @@
    <widget class="QPushButton" name="btnBelugaPN_SN">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>320</x>
       <y>400</y>
       <width>121</width>
       <height>29</height>
@@ -483,6 +483,32 @@
     </property>
     <property name="text">
      <string>Beluga_PN_SN</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="cboxConnection">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>20</y>
+      <width>100</width>
+      <height>26</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblConnection">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>81</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Connection</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
   </widget>

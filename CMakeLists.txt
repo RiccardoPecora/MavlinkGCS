@@ -11,8 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(INCLUDE_DIR_RIC "lib/")
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets SerialPort)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets SerialPort)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets SerialPort Network)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets SerialPort Network)
 
 
 set(PROJECT_SOURCES
@@ -36,6 +36,7 @@ qt_add_executable(MavlinkGCS_v01
         lib/Comm_Serial.h lib/Comm_Serial.cpp
         lib/Mavlink_8.h
         lib/Mavlink_8.cpp
+        xbee.h xbee.cpp
 
 
     )
@@ -57,7 +58,10 @@ else()
     endif()
 endif()
 
-target_link_libraries(MavlinkGCS_v01 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::SerialPort)
+target_link_libraries(MavlinkGCS_v01 PRIVATE
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::SerialPort
+    Qt${QT_VERSION_MAJOR}::Network)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
