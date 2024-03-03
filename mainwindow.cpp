@@ -138,6 +138,8 @@ void MainWindow::sendMsg_HearBit()
 
     uint8_t buf[MAX_PACKET_LENGHT];
     mavlink_msg_to_send_buffer(buf, &msg);
+    //QByteArray test = QByteArray::fromRawData((char*)buf, msg.len + OTHER_MSG_BYTE);
+    //ui->txtEdRead->append(test.toHex());
     sp->write((char*)buf, (qint64)(msg.len + OTHER_MSG_BYTE));
 }
 
@@ -176,73 +178,14 @@ void MainWindow::serialRead()
     // qInfo() << "Bytes Letti: " << buf;
     //QByteArray data = sp->readAll();
     QByteArray buf = sp->readAll() ;
-    //while(sp->bytesAvailable()){
     foreach (char byte_read, buf) {
-
-        switch(frame_state){
-            case XBEE::START_DELIMITER:{
-                if(byte_read == 0x7E){
-                    data_buf.append(byte_read);
-                    xbee_frame_idx = 1;
-                    frame_state = XBEE::LENGTH;
-                }
-                break;
-            }
-
-            case XBEE::LENGTH:{
-                if(xbee_frame_idx == 1){
-                    data_buf.append(byte_read);
-                    xbee_frame_len += byte_read << 8;
-                    xbee_frame_idx++;
-                }else if(xbee_frame_idx == 2){
-                    data_buf.append(byte_read);
-                    xbee_frame_len += byte_read;
-                    xbee_frame_len += XBEE::XBEE_FRAME_INIT_OFFSET_BYTE;
-                    xbee_frame_idx++;
-                    frame_state = XBEE::FRAME_TYPE;
-                }
-                break;
-            }
-
-            case XBEE::FRAME_TYPE:{
-                if(xbee_frame_idx < xbee_frame_len - 1){
-                    data_buf.append(byte_read);
-                    xbee_frame_idx++;
-                    frame_state = XBEE::DATA;
-                }
-                break;
-            }
-
-            case XBEE::DATA:{
-                if(xbee_frame_idx < xbee_frame_len - 1){
-                    data_buf.append(byte_read);
-                    xbee_frame_idx++;
-                }else if(xbee_frame_idx == xbee_frame_len - 1){
-                    data_buf.append(byte_read);
-                    xbee_frame_idx++;
-                    frame_state = XBEE::CHECK_SUM;
-                }
-                break;
-            }
-
-            case XBEE::CHECK_SUM:{
-                if(xbee_frame_idx == xbee_frame_len){
-                    data_buf.append(byte_read);
-                    msg = data_buf;
-                    xbee_frame_idx = 0;
-                    xbee_frame_len = 0;
-                    data_buf.clear();
-                    frame_state = XBEE::START_DELIMITER;
-                }
-                break;
-            }
+        if(xbee.parse_xbee_frame(byte_read, msg)){
+            ui->txtEdRead->append(msg.toHex());
+            uint16_t len = msg.size();
+            parse_mavlink_msg((uint8_t*)msg.data(), len);
+            msg.clear();
         }
     }
-
-
-    ui->txtEdRead->append(msg.toHex());
-    //uint16_t len = data.size();
-    //parse_mavlink_msg((uint8_t*)data.data(), len);
 }
 
 void MainWindow::parse_mavlink_msg(uint8_t *buf, uint16_t &buf_len){
@@ -275,9 +218,13 @@ void MainWindow::handle_mavlink_msg(mavlink_message_t &msg){
             ui->txtEdRead->append("Heartbeat - Mavlink Version: " + QString::number(heartbeat.mavlink_version));
             ui->txtEdRead->append("Heartbeat - Autopilot: " + QString::number(heartbeat.autopilot));
             ui->txtEdRead->append("Heartbeat - Base_Mode: " + QString::number(heartbeat.base_mode));
+            ui->txtEdRead->append("Heartbeat - System-ID: " + QString::number(msg.sysid));
+            ui->txtEdRead->append("Heartbeat - Component-ID: " + QString::number(msg.compid));
             cout << "Heartbeat - Mavlink Version: " << to_string(heartbeat.mavlink_version) << endl;
             cout << "Heartbeat - Autopilot: " << to_string(heartbeat.autopilot) << endl;
             cout << "Heartbeat - Base_Mode: " << to_string(heartbeat.base_mode) << endl;
+            cout << "Heartbeat - System-ID: " << to_string(msg.sysid) << endl;
+            cout << "Heartbeat - Component-ID: " << to_string(msg.compid) << endl;
     #endif // DEBUG
 
             break;

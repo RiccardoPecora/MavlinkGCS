@@ -37,11 +37,8 @@ private:
     Ui::MainWindow *ui;
     QSerialPort *sp;
     struct serial_port_config config {0};
-    QByteArray data_buf, msg;
-    uint frame_in_progress = 0;
-    XBEE::FRAME_STATE frame_state = XBEE::START_DELIMITER;
-    uint xbee_frame_idx = 0;
-    uint xbee_frame_len = 0;
+    XBEE xbee;
+    QByteArray msg;
 
     void fillPortsParameters();
     void parse_mavlink_msg(uint8_t *buf, uint16_t &buf_len);
