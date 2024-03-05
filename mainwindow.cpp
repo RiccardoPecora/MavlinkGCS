@@ -138,9 +138,20 @@ void MainWindow::sendMsg_HearBit()
 
     uint8_t buf[MAX_PACKET_LENGHT];
     mavlink_msg_to_send_buffer(buf, &msg);
-    //QByteArray test = QByteArray::fromRawData((char*)buf, msg.len + OTHER_MSG_BYTE);
-    //ui->txtEdRead->append(test.toHex());
-    sp->write((char*)buf, (qint64)(msg.len + OTHER_MSG_BYTE));
+
+    uint64_t buf_len = msg.len + OTHER_MSG_BYTE;
+
+    QByteArray test1 = QByteArray::fromRawData((char*)buf, buf_len);
+    ui->txtEdRead->append(test1.toHex());
+
+    uint8_t xbee_buf[XBEE_MAX_PACKET_LENGHT];
+    uint64_t xbee_buf_len = 0;
+    xbee.frame_pack(buf, buf_len, xbee_buf, xbee_buf_len);
+
+    QByteArray test = QByteArray::fromRawData((char*)xbee_buf, xbee_buf_len);
+    ui->txtEdRead->append(test.toHex());
+
+    sp->write((char*)xbee_buf, xbee_buf_len);
 }
 
 void MainWindow::sendMsg_Attitude()
