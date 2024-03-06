@@ -141,15 +141,26 @@ void MainWindow::sendMsg_HearBit()
 
     uint64_t buf_len = msg.len + OTHER_MSG_BYTE;
 
-    //QByteArray test1 = QByteArray::fromRawData((char*)buf, buf_len);
-    //ui->txtEdRead->append(test1.toHex());
+    XBEE::Tx_Req_Frame tx_frame;
+    //tx_frame.frame_type = XBEE::API_ID::TRANSMIT_REQUEST;
+    tx_frame.frame_id = 0x00;
+    tx_frame.dest_addr_64bit = 0x0013A2004092D7EE;
+    tx_frame.dest_addr_16bit = 0xFFFE;
+    tx_frame.broadcast_radius = 0x00;
+    tx_frame.transmit_options = 0x00;
+    tx_frame.payload_data = buf;
+    tx_frame.payload_len = buf_len;
+
+
+    QByteArray test1 = QByteArray::fromRawData((char*)buf, buf_len);
+    ui->txtEdRead->append(test1.toHex());
 
     uint8_t xbee_buf[XBEE_MAX_PACKET_LENGHT];
     uint64_t xbee_buf_len = 0;
-    xbee.frame_pack(buf, buf_len, xbee_buf, xbee_buf_len);
+    xbee.frame_pack(tx_frame, xbee_buf, xbee_buf_len);
 
-    //QByteArray test = QByteArray::fromRawData((char*)xbee_buf, xbee_buf_len);
-    //ui->txtEdRead->append(test.toHex());
+    QByteArray test = QByteArray::fromRawData((char*)xbee_buf, xbee_buf_len);
+    ui->txtEdRead->append(test.toHex());
 
     sp->write((char*)xbee_buf, xbee_buf_len);
 }
