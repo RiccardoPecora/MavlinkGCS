@@ -71,8 +71,13 @@ public:
     /*
      * METHODS
      */
+public:
     bool parse_xbee_frame(char _byte_read, QByteArray& _msg);
     void frame_pack(Frame &_frame, uint8_t *_xbee_buf, uint64_t &_frame_len);
+
+private:
+    uint64_t swapLong(void *X);
+
 
 private:
     QByteArray data_buf, msg;

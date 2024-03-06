@@ -162,7 +162,7 @@ void XBEE::frame_pack(Frame &_frame, uint8_t *_xbee_buf, uint64_t &_frame_len){
             }
 
             //Length
-            _frame_len = idx - 3;
+            _frame_len = idx - XBEE_FRAME_INIT_OFFSET_BYTE;
             _xbee_buf[1] = ((uint8_t)(_frame_len >> 8)) & 0xFF;
             _xbee_buf[2] = (uint8_t)_frame_len;
             _frame_len += XBEE_OTHER_FRAME_BYTES;
@@ -178,10 +178,6 @@ void XBEE::frame_pack(Frame &_frame, uint8_t *_xbee_buf, uint64_t &_frame_len){
         }
 
     }
-
-
-
-
-
-
 }
+
+
