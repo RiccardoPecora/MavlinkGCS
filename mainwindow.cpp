@@ -8,9 +8,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->statusBar->showMessage("Ready...");
     qDebug("Ready");
 
+
     sp = new QSerialPort();
     fillPortsParameters();
 
+    worker_tick = new WorkerTick(this);
 
     connect(ui->btnConnect,SIGNAL(clicked()),this,SLOT(serialConnect()));
     connect(ui->btnDisconnect,SIGNAL(clicked()),this,SLOT(serialDisconnect()));
@@ -19,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->btnBelugaPN_SN,SIGNAL(clicked()),this,SLOT(sendMsg_BelugaPNSN()));
     connect(sp,SIGNAL(readyRead()),this,SLOT(serialRead()));
     //connect(sp,SIGNAL(errorOccurred(QSerialPort::SerialPortError)),this,SLOT(serialError(QSerialPort::SerialPortError)));
+    connect(worker_tick, &WorkerTick::sgnTick1s, this, &MainWindow::heartbit_loop);
+    worker_tick->start();
 }
 
 MainWindow::~MainWindow()
@@ -81,15 +85,13 @@ void MainWindow::serialConnect()
             ui->btnConnect->setEnabled(false);
             ui->btnDisconnect->setEnabled(true);
 
-            uint8_t buf[MAVLINK_MAX_PACKET_LEN];
-            uint16_t buf_len;
-            sp->write((char*)buf, (qint64)buf_len);
         }
     }catch (exception e) {
         qWarning() << "Errore durante l'apertura della porta: " << e.what();
     }
 
 }
+
 
 void MainWindow::serialDisconnect()
 {
@@ -143,7 +145,7 @@ void MainWindow::sendMsg_HearBit()
 
     XBEE::Tx_Req_Frame tx_frame;
     tx_frame.frame_id = 0x00;
-    tx_frame.dest_addr_64bit = 0x0013A2004092D7EE;
+    tx_frame.dest_addr_64bit = COORDINATOR_64BIT_ADDRESS;
     tx_frame.dest_addr_16bit = 0xFFFE;
     tx_frame.broadcast_radius = 0x00;
     tx_frame.transmit_options = 0x00;
@@ -162,6 +164,7 @@ void MainWindow::sendMsg_HearBit()
 
     sp->write((char*)xbee_buf, xbee_buf_len);
 }
+
 
 void MainWindow::sendMsg_Attitude()
 {
@@ -209,6 +212,12 @@ void MainWindow::sendMsg_BelugaPNSN()
     sp->write((char*)xbee_buf, xbee_buf_len);
 }
 
+
+void MainWindow::heartbit_loop(){
+    if(sp->isOpen()){
+        sendMsg_HearBit();
+    }
+}
 
 void MainWindow::serialRead()
 {

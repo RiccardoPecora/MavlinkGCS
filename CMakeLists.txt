@@ -37,6 +37,7 @@ qt_add_executable(MavlinkGCS_v01
         lib/Mavlink_8.h
         lib/Mavlink_8.cpp
         xbee.h xbee.cpp
+        worker_tick.h worker_tick.cpp
 
 
     )
