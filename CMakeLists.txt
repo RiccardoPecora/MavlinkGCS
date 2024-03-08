@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(MavlinkGCS_v01 VERSION 0.1 LANGUAGES CXX)
+project(MavlinkGCS VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -30,7 +30,7 @@ set(PROJECT_SOURCES
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 
 
-qt_add_executable(MavlinkGCS_v01
+qt_add_executable(MavlinkGCS
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         lib/Comm_Serial.h lib/Comm_Serial.cpp
@@ -47,19 +47,19 @@ qt_add_executable(MavlinkGCS_v01
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
-        add_library(MavlinkGCS_v01 SHARED
+        add_library(MavlinkGCS SHARED
             ${PROJECT_SOURCES}
         )
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
-        add_executable(MavlinkGCS_v01
+        add_executable(MavlinkGCS
             ${PROJECT_SOURCES}
         )
     endif()
 endif()
 
-target_link_libraries(MavlinkGCS_v01 PRIVATE
+target_link_libraries(MavlinkGCS PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::SerialPort
     Qt${QT_VERSION_MAJOR}::Network)
@@ -70,7 +70,7 @@ target_link_libraries(MavlinkGCS_v01 PRIVATE
 if(${QT_VERSION} VERSION_LESS 6.1.0)
   set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.GUI_SerialPort_v04)
 endif()
-set_target_properties(MavlinkGCS_v01 PROPERTIES
+set_target_properties(MavlinkGCS PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -79,12 +79,12 @@ set_target_properties(MavlinkGCS_v01 PROPERTIES
 )
 
 include(GNUInstallDirs)
-install(TARGETS MavlinkGCS_v01
+install(TARGETS MavlinkGCS
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(MavlinkGCS_v01)
+    qt_finalize_executable(MavlinkGCS)
 endif()
