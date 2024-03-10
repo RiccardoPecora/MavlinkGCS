@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "xbee_lib/msg_receive_packet.h"
+
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -22,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(sp,SIGNAL(readyRead()),this,SLOT(serialRead()));
     //connect(sp,SIGNAL(errorOccurred(QSerialPort::SerialPortError)),this,SLOT(serialError(QSerialPort::SerialPortError)));
     connect(worker_tick, &WorkerTick::sgnTick1s, this, &MainWindow::heartbit_loop);
-    worker_tick->start();
+    //worker_tick->start();
 }
 
 MainWindow::~MainWindow()
@@ -143,24 +145,24 @@ void MainWindow::sendMsg_HearBit()
 
     uint64_t buf_len = msg.len + OTHER_MSG_BYTE;
 
-    XBEE::Tx_Req_Frame tx_frame;
-    tx_frame.frame_id = 0x00;
-    tx_frame.dest_addr_64bit = COORDINATOR_64BIT_ADDRESS;
-    tx_frame.dest_addr_16bit = 0xFFFE;
-    tx_frame.broadcast_radius = 0x00;
-    tx_frame.transmit_options = 0x00;
-    tx_frame.payload_data = buf;
-    tx_frame.payload_len = buf_len;
+    Msg_TransmitRequest tx_req;
+    tx_req.frame_id = 0x00;
+    tx_req.dest_addr_64bit = XBEE2_UAV1_64BIT_ADDRESS;
+    tx_req.dest_addr_16bit = 0xFFFE;
+    tx_req.broadcast_radius = 0x00;
+    tx_req.transmit_options = 0x00;
+    tx_req.payload_data = buf;
+    tx_req.payload_len = buf_len;
 
-    // QByteArray test1 = QByteArray::fromRawData((char*)buf, buf_len);
-    // ui->txtEdRead->append(test1.toHex());
+    QByteArray test1 = QByteArray::fromRawData((char*)buf, buf_len);
+    ui->txtEdRead->append(test1.toHex());
 
     uint8_t xbee_buf[XBEE_MAX_PACKET_LENGHT];
     uint64_t xbee_buf_len = 0;
-    xbee.frame_pack(tx_frame, xbee_buf, xbee_buf_len);
+    tx_req.encode(xbee_buf, xbee_buf_len);
 
-    // QByteArray test = QByteArray::fromRawData((char*)xbee_buf, xbee_buf_len);
-    // ui->txtEdRead->append(test.toHex());
+    QByteArray test = QByteArray::fromRawData((char*)xbee_buf, xbee_buf_len);
+    ui->txtEdRead->append(test.toHex());
 
     sp->write((char*)xbee_buf, xbee_buf_len);
 }
@@ -195,18 +197,18 @@ void MainWindow::sendMsg_BelugaPNSN()
 
     uint64_t buf_len = msg.len + OTHER_MSG_BYTE;
 
-    XBEE::Tx_Req_Frame tx_frame;
-    tx_frame.frame_id = 0x00;
-    tx_frame.dest_addr_64bit = 0x0013A2004092D7EE;
-    tx_frame.dest_addr_16bit = 0xFFFE;
-    tx_frame.broadcast_radius = 0x00;
-    tx_frame.transmit_options = 0x00;
-    tx_frame.payload_data = buf;
-    tx_frame.payload_len = buf_len;
+    Msg_TransmitRequest tx_req;
+    tx_req.frame_id = 0x00;
+    tx_req.dest_addr_64bit = 0x0013A2004092D7EE;
+    tx_req.dest_addr_16bit = 0xFFFE;
+    tx_req.broadcast_radius = 0x00;
+    tx_req.transmit_options = 0x00;
+    tx_req.payload_data = buf;
+    tx_req.payload_len = buf_len;
 
     uint8_t xbee_buf[XBEE_MAX_PACKET_LENGHT];
     uint64_t xbee_buf_len = 0;
-    xbee.frame_pack(tx_frame, xbee_buf, xbee_buf_len);
+    tx_req.encode(xbee_buf, xbee_buf_len);
 
     //sp->write((char*)buf, (qint64)(msg.len + OTHER_MSG_BYTE));
     sp->write((char*)xbee_buf, xbee_buf_len);
@@ -225,11 +227,9 @@ void MainWindow::serialRead()
     //QByteArray data = sp->readAll();
     QByteArray buf = sp->readAll() ;
     foreach (char byte_read, buf) {
-        if(xbee.parse_xbee_frame(byte_read, msg)){
+        if(xbee_helper.parse_xbee_frame(byte_read, msg)){
             ui->txtEdRead->append(msg.toHex());
-            uint16_t len = msg.size();
-            parse_mavlink_msg((uint8_t*)msg.data(), len);
-            msg.clear();
+            decode(msg);
         }
     }
 }
@@ -474,3 +474,36 @@ void MainWindow::handle_mavlink_msg(mavlink_message_t &msg){
     }
 }
 
+
+
+/*
+ * decode
+ *
+ */
+bool MainWindow::decode(QByteArray& _msg){
+
+    uint8_t frame_type = _msg[3];
+
+    switch(frame_type){
+        case API_ID::RECEIVE_PACKET:{
+            Msg_ReceivePacket rcv_pkt;
+            rcv_pkt.decode(_msg);
+            parse_mavlink_msg(rcv_pkt.receive_data, rcv_pkt.receive_data_len);
+            _msg.clear();
+            break;
+        }
+
+        case API_ID::NODE_IDENTIFICATION_INDICATOR:{
+            Msg_NodeIdIndicator ni;
+            ni.decode(_msg);
+            Xbee_module* xbee = new Xbee_module();
+            xbee->setAddr16bit(ni.src_addr_16bit);
+            xbee->setAddr64bit(ni.src_addr_64bit);
+            xbee->setNodeIdString(ni.node_id_string);
+            xbee_discovery_list.append(xbee);
+            break;
+        }
+    }
+
+    return true;
+}
