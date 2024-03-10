@@ -1,13 +1,12 @@
-#include "msg_receive_packet.h"
-#include "qdebug.h"
+#include "msg_io_sample_indicator.h"
 
-Msg_ReceivePacket::Msg_ReceivePacket() {}
+Msg_IOSampleIndicator::Msg_IOSampleIndicator() {}
 
 /*
  * Name: encode
  * Description: encode message in a frame
  */
-void Msg_ReceivePacket::encode(uint8_t *buf, uint64_t &len)
+void Msg_IOSampleIndicator::encode(uint8_t *buf, uint64_t &len)
 {
 
 }
@@ -16,10 +15,10 @@ void Msg_ReceivePacket::encode(uint8_t *buf, uint64_t &len)
  * Name: decode
  * Description: decode message in a frame
  */
-void Msg_ReceivePacket::decode(QByteArray &_msg)
+void Msg_IOSampleIndicator::decode(QByteArray &_msg)
 {
     uint8_t idx = 0;
-    uint16_t msg_len = _msg.size();
+   // uint16_t msg_len = _msg.size();
 
     //Start Delimiter
     this->start_delimiter = _msg[idx++];
@@ -49,16 +48,30 @@ void Msg_ReceivePacket::decode(QByteArray &_msg)
     //Receive Options
     this->receive_options = _msg[idx++];
 
-    //Receive Data Length
-    this->receive_data_len = msg_len - 16;
+    //Number of Samples
+    this->number_of_samples = _msg[idx++];
 
-    //Receive Data
-    this->receive_data = new uint8_t[this->receive_data_len];
-    uint8_t *ptr_rcv_data = this->receive_data;
-    for(uint16_t i = 0 ; i < this->receive_data_len; i++){
-        ptr_rcv_data[i] = _msg[idx++];
+    //Digital Sample Mask
+    this->digital_sample_mask = (((uint16_t)_msg[idx]) << 8) | _msg[idx + 1];
+    idx++;
+    idx++;
+
+    //Analog Sample Mask
+    this->analog_sample_mask = _msg[idx++];
+
+    //Digital Sample
+    if(this->digital_sample_mask){
+        this->digital_samples = (((uint16_t)_msg[idx]) << 8) | _msg[idx + 1];
+        idx++;
+        idx++;
     }
 
+    //Analog Sample
+    if(this->analog_sample_mask){
+        this->analog_samples = (((uint16_t)_msg[idx]) << 8) | _msg[idx + 1];
+        idx++;
+        idx++;
+    }
     //Checksum
     this->checksum = _msg[idx];
 }

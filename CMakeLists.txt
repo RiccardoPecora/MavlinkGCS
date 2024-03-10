@@ -46,6 +46,7 @@ qt_add_executable(MavlinkGCS
         xbee_lib/xbee_helper.h xbee_lib/xbee_helper.cpp
         xbee_lib/xbee_module.h xbee_lib/xbee_module.cpp
         xbee_lib/msg_receive_packet.h xbee_lib/msg_receive_packet.cpp
+        xbee_lib/msg_io_sample_indicator.h xbee_lib/msg_io_sample_indicator.cpp
 
 
 

@@ -503,6 +503,25 @@ bool MainWindow::decode(QByteArray& _msg){
             xbee_discovery_list.append(xbee);
             break;
         }
+
+        case API_ID::IO_SAMPLE_INDICATOR:{
+            Msg_IOSampleIndicator io;
+            io.decode(_msg);
+            if(io.digital_sample_mask & 0x0001){
+                qInfo() << "D0: " << ( (io.digital_samples & 0x0001) != 0 );
+            }
+            if(io.digital_sample_mask & 0x0002){
+                qInfo() << "D1: " << ( (io.digital_samples & 0x0002) != 0 );
+            }
+            if(io.digital_sample_mask & 0x0004){
+                qInfo() << "D2: " << ( (io.digital_samples & 0x0004) != 0 );
+            }
+            if(io.digital_sample_mask & 0x0008){
+                qInfo() << "D3: " << ( (io.digital_samples & 0x0008) != 0 );
+            }
+            break;
+        }
+
     }
 
     return true;

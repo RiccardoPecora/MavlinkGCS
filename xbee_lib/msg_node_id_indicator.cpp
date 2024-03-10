@@ -3,10 +3,18 @@
 
 Msg_NodeIdIndicator::Msg_NodeIdIndicator() {}
 
+/*
+ * Name: encode
+ * Description: encode message in a frame
+ */
 void Msg_NodeIdIndicator::encode(uint8_t *buf, uint64_t &len){
 
 }
 
+/*
+ * Name: decode
+ * Description: decode message in a frame
+ */
 void Msg_NodeIdIndicator::decode(QByteArray& _msg){
 
     uint8_t idx = 0;

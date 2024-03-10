@@ -4,7 +4,7 @@
 #include <QObject>
 #include "msg_transmit_request.h"
 #include "msg_node_id_indicator.h"
-
+#include "msg_io_sample_indicator.h"
 
 #define XBEE_MAX_PACKET_LENGHT 255
 #define XBEE_FRAME_INIT_OFFSET_BYTE 3 //start delimiter, length MSB, length LSB,
